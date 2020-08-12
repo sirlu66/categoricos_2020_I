@@ -1,18 +1,19 @@
 ---
-title: "Cribados de cáncer de pulmón y métricas para estas"
-author: "Luis Farfan, Jose Fernandez, Anthony Moran, Daniel Sirlupu"
+title: "Test de diagnóstico para comparar pruebas con cribado en Tomografía y Rayos X en el cáncer de pulmón"
+author: "Luis Farfán, Jose Fernández, Anthony Morán, Daniel Sirlupu"
+subtitle: "Análisis de datos categóricos"
 output:
   pagedown::html_paged:
     toc: true
-    # change to true for a self-contained document, but it'll be a litte slower for Pandoc to render
     self_contained: false
-# uncomment this line to produce HTML and PDF in RStudio:
+
 knit: pagedown::chrome_print
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(comment = NA)
+library(dplyr)
 ```
 
 
@@ -32,7 +33,8 @@ Ante esto surge la disposición de una prueba de cribado que detecte la enfermed
 El principal factor de riesgo del cáncer de pulmón es el tabaco, siendo el responsable del 85% de los casos. Además, figura entre los cinco factores de riesgo principales causantes de las enfermedades crónicas de los adultos, entre ellas el cáncer, en 2010. Supone un 6,3% de AVAD mundiales (8,4% en hombres, en los que es el factor principal y 3,7% en mujeres en el que representa el cuarto factor de riesgo de enfermedad. El porcentaje del total de AVPP por cáncer de pulmón a causa del tabaco representa el 84% en España en ambos sexos (hombres 90% y mujeres 40%, datos del 2010) similares a los datos para Europa occidental (salvo en mujeres que en la última el porcentaje es 70%) y por encima de las proporciones mundiales (ambos sexos 63%, hombres 67%, mujeres 49%).
 Un factor de riesgo de especial importancia es la exposición ocupacional. La Agencia Internacional para la Investigación en Cáncer (IARC), dependiente de la OMS, estimó que el 10% de las muertes por cáncer de pulmón entre los hombres y el 5% en las mujeres en el mundo se podrían atribuir a la exposición a 8 carcinógenos ocupacionales pulmonares, los asbestos, el arsénico, el berilio, el cadmio, el cromo, el níquel, los silicatos y el diésel. Destacan los asbestos, cuyo papel como carcinógeno directo o a través del aumento de riesgo tras la fibrosis pulmonar que pueden desencadenar está todavía a debate.
 
-## Principios y consideraciones éticas de las pruebas de cribado. Requisitos de un programa de cribado
+## Principios y consideraciones éticas de las pruebas de cribado
+
 Según se recoge en el Documento Marco del Ministerio sobre Cribado Poblacional, el cribado puede llegar a reducir el impacto de una determinada enfermedad en la población, sin embargo, no siempre la detección precoz produce los beneficios esperados y tampoco está exenta de riesgos. Existe un claro requerimiento ético de que el beneficio debe superar los potenciales riesgos físicos y/o psicológicos derivados de la prueba, del proceso diagnóstico y del tratamiento.
 
 El beneficio del cribado se obtiene mediante un diagnóstico precoz preciso, que permita realizar una intervención adecuada y mejorar el pronóstico en gran parte de los pacientes detectados. Este beneficio se debe cuantificar no solo en términos relativos de reducción del riesgo, sino también en cifras absolutas que permitan conocer el verdadero impacto de la intervención en la carga de la enfermedad en la población diana. Entre los riesgos asociados al cribado se incluye un periodo de mayor morbilidad debido al adelanto diagnóstico en aquellos pacientes en los que la detección precoz no habría supuesto una mejora de su pronóstico
@@ -127,7 +129,9 @@ Porcentaje de cánceres en estadios avanzados (III-IV) detectados del total de c
 
 Para fines prácticos del curso se tomará la información proporcionada por las tablas de comparación de cribado anual con TCBD frente a cribado con radiografía de tórax.
 
-**esESPECIFICAR QUE SOLO ES DEL NLST**
+- Tamaño de muestra (TCBD) = 75126.
+
+- Tamaño de muestra (Radiografia) = 73470.
 
 ### Diseño del estudio
 
@@ -135,11 +139,11 @@ Para fines prácticos del curso, este análisis se centrará en las variables an
 
 ![](tabla.png)
 
-## Analisis en R
+## Métricas en R
 
-### TOMOGRAFIA
+### Tomogradía
 
-#### data 
+#### Datos tomografía 
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 data = rbind(
@@ -153,7 +157,7 @@ colnames(data) = c("Cancer si", "Cancer no")
 data
 ```
 
-####  metricas
+#### Métricas tomografía
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -161,9 +165,9 @@ library(caret)
 caret::confusionMatrix(data = datos)
 ```
 
-### RADIOGRAFIA
+### Radiografía
 
-#### data
+#### Datos radiografía
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 data = rbind(
@@ -177,7 +181,7 @@ colnames(data) = c("Cancer si", "Cancer no")
 data
 ```
 
-####  metricas
+####  Métricas radiografía
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -185,9 +189,46 @@ library(caret)
 caret::confusionMatrix(data = datos)
 ```
 
-# Conclusiones`
+# Conclusiones
 
-aca comparar ambas prubeas y decir que la de tomografia es mejor.
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+sens_tc = 0.936508*100
+espec_tc = 0.764930*100
+sens_rx = 0.654930*100
+espec_rx = 0.934788*100
+vpp_tc = 0.035765*100
+vpn_tc = 0.999228*100
+vpp_rx = 0.055324*100
+vpn_rx = 0.997852*100
 
 
+dif_sens = sens_tc - sens_rx 
+dif_espc = espec_tc - espec_rx
+
+
+comparando = rbind(
+  c(sens_tc, espec_tc, vpp_tc, vpn_tc),
+  c(sens_rx, espec_rx, vpp_rx, vpn_rx),
+  c(dif_sens,dif_espc, NA, NA)
+)
+
+
+
+colnames(comparando) = c("Sensibilidad", "Especificidad","VPP", "VPN")
+rownames(comparando) = c("Tomografía", "Radiografía", "Diferencia")
+comparando
+```
+
+
+Se observa que la sensibilidad disminuye  usando el metodo de cribado de radiografia pero la especificidad aumenta, esto se entiende por el objetivo y la tecnologia de los metodos de cribado.
+
+
+El objetivo en el campo medico es detectar a personas con el cancer de pulmon, con esto la **sensibilidad** es la metrica a usar. 
+
+
+# Bibliografía
+
+- Pita Fernández, S., & Pértegas Díaz, S. (2003, 14 julio). Pruebas diagnósticas. 
+
+- La importancia de los Test diagnósticos: Sensibilidad, Especificidad (2019, 24 diciembre). Conciencia Colectiva. https://www.conciencia-colectiva.cl/articulos/2017/06/la-importancia-de-los-test-diagnosticos-sensibilidad-especificidad-vpp-y-vpn/
 
